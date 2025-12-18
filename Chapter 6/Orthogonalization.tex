@@ -1,0 +1,227 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs} % 用于制作更美观的表格
+\usepackage{multirow} % 用于合并表格行
+\usepackage{geometry} % 调整页边距
+\geometry{a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{MATH2101 Chapter 6: Orthogonalization}
+\fancyfoot[C]{\thepage}
+
+\title{\textbf{Orthogonalization}}
+\author{MATH 2101 Linear Algebra I, Fall 2025}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{fancy} % 让标题页也有页眉页脚
+
+\section*{摘要}
+本章介绍了向量空间中内积（Inner Product）的概念，这是将几何直观（如长度、角度、垂直）推广到一般向量空间的代数工具。首先，本章给出了内积的公理化定义及其基本性质，并通过多个例子说明其多样性。其次，定义了正交（Orthogonal）与标准正交（Orthonormal）集合，证明了正交向量组必线性无关，并给出了正交向量组下线性组合的显式公式（傅里叶系数）。接着，本章的核心内容是格拉姆-施密特正交化过程（Gram-Schmidt Process），这是一个从任意基构造标准正交基的系统方法。然后，本章引入了正交补（Orthogonal Complement）的概念，并证明了任何向量可以唯一地分解为子空间及其正交补中的分量之和，即正交投影（Orthogonal Projection）。最后，作为可选内容，本章简要介绍了正交矩阵（Orthogonal Matrix）、对称矩阵的正交对角化（Orthogonal Diagonalization）以及正定矩阵（Positive Definite Matrix）与内积的联系。
+
+\section{本章目标}
+\begin{itemize}
+    \item 什么是向量空间上的内积？
+    \item 向量空间上内积的例子。
+    \item 标准正交基与格拉姆-施密特过程。
+    \item 正交补与投影。
+\end{itemize}
+
+\section{内积空间}
+\subsection{内积的定义}
+\textbf{定义 1.1 (内积)}：设 $V$ 是一个向量空间。$V$ 上的一个 \textbf{内积（Inner Product）} 是一个函数 $\langle \cdot, \cdot \rangle: V \times V \to \mathbb{R}$，对每一对 $(x, y) \in V \times V$ 赋予一个实数，并满足以下性质：
+\begin{enumerate}
+    \item[(a)] \textbf{加法性}：对任意 $x, y, z \in V$，$\langle x+y, z \rangle = \langle x, z \rangle + \langle y, z \rangle$。
+    \item[(b)] \textbf{齐次性}：对任意 $x, y \in V$ 和 $c \in \mathbb{R}$，$\langle c x, y \rangle = c \langle x, y \rangle$。
+    \item[(c)] \textbf{对称性}：对任意 $x, y \in V$，$\langle x, y \rangle = \langle y, x \rangle$。
+    \item[(d)] \textbf{正定性}：对任意 $x \in V$，若 $x \neq 0$，则 $\langle x, x \rangle > 0$。
+\end{enumerate}
+配备了一个内积的向量空间称为 \textbf{内积空间（Inner Product Space）}。
+
+\textbf{命题 1.2 (内积的简单推论)}：设 $V$ 是内积空间，则
+\begin{enumerate}
+    \item[(a)] 对任意 $x, y, z \in V$，$\langle z, x+y \rangle = \langle z, x \rangle + \langle z, y \rangle$。（由对称性和加法性推出）
+    \item[(b)] 对任意 $x, y \in V$ 和 $c \in \mathbb{R}$，$\langle x, c y \rangle = c \langle x, y \rangle$。（由对称性和齐次性推出）
+    \item[(c)] 对任意 $x \in V$，$\langle 0, x \rangle = \langle x, 0 \rangle = 0$。
+    \item[(d)] 对任意 $x \in V$，$\langle x, x \rangle = 0$ 当且仅当 $x = 0$。
+\end{enumerate}
+
+\subsection{例子}
+\begin{itemize}
+    \item \textbf{标准内积（Standard Inner Product）}：在 $\mathbb{R}^n$ 上，对 $x = (x_1, \dots, x_n)^T$, $y = (y_1, \dots, y_n)^T$，定义 $\langle x, y \rangle = x_1 y_1 + \dots + x_n y_n = x^T y$。这是 $\mathbb{R}^n$ 上的标准内积（当 $n=2,3$ 时即为点积）。
+    \item \textbf{加权内积（Weighted Inner Product）}：固定正实数 $a_1, \dots, a_n > 0$，在 $\mathbb{R}^n$ 上定义 $\langle x, y \rangle = a_1 x_1 y_1 + \dots + a_n x_n y_n$。这也是一个内积。
+    \item \textbf{非内积的例子}：在 $\mathbb{R}^2$ 上定义 $\langle (x_1, x_2)^T, (y_1, y_2)^T \rangle = x_1 y_1 - x_2 y_2$。这不是内积，因为 $\langle (0, 1)^T, (0, 1)^T \rangle = -1 < 0$，违反了正定性。
+\end{itemize}
+
+\subsubsection*{从线性变换构造内积（习题 1.7）}
+设 $T: V \to W$ 是一个单射线性变换，$\langle \cdot, \cdot \rangle'$ 是 $W$ 上的内积。则在 $V$ 上定义 $\langle x, y \rangle = \langle T(x), T(y) \rangle'$ 构成一个内积。单射条件是保证正定性的关键。若 $T$ 不是单射，则可能对非零 $x$ 有 $\langle x, x \rangle = 0$，违反正定性。
+
+\subsection{内积的几何解释与动机}
+内积可以用来推广长度的概念。
+\begin{itemize}
+    \item \textbf{定义 1.10 (长度)}：设 $V$ 是内积空间。对 $x \in V$，定义其 \textbf{长度（Length）} 或 \textbf{范数（Norm）} 为 $\|x\| = \sqrt{\langle x, x \rangle}$。
+    \item \textbf{例子}：在 $\mathbb{R}^n$ 的标准内积下，$\|x\| = \sqrt{x_1^2 + \dots + x_n^2}$。
+\end{itemize}
+
+\subsubsection*{内积与长度的基本定理（定理 1.13）}
+设 $V$ 是内积空间，则对所有 $x, y \in V$ 和 $c \in \mathbb{R}$，有：
+\begin{enumerate}
+    \item[(a)] \textbf{伸缩性}：$\|c x\| = |c| \|x\|$。
+    \item[(b)] \textbf{零向量的唯一性}：$\|x\| = 0$ 当且仅当 $x = 0$。
+    \item[(c)] \textbf{柯西-施瓦茨不等式（Cauchy-Schwarz Inequality）}：$|\langle x, y \rangle| \le \|x\| \|y\|$。
+    \item[(d)] \textbf{三角不等式（Triangle Inequality）}：$\|x + y\| \le \|x\| + \|y\|$。
+\end{enumerate}
+证明要点：$(a),(b)$ 直接由定义推出。$(c)$ 通过考虑 $\langle x - c y, x - c y \rangle \ge 0$ 并取 $c = \frac{\langle x, y \rangle}{\|y\|^2}$ 得到。$(d)$ 由 $(c)$ 推出。
+
+\section{标准正交子集}
+\subsection{正交与标准正交}
+\textbf{定义 2.1}：设 $V$ 是内积空间。
+\begin{itemize}
+    \item 对 $x, y \in V$，若 $\langle x, y \rangle = 0$，则称 $x$ 与 $y$ \textbf{正交（Orthogonal）}。
+    \item 子集 $S \subset V$ 称为 \textbf{正交的（Orthogonal）}，如果其中任意两个不同的向量都正交。
+    \item 向量 $v \in V$ 称为 \textbf{单位的（Unit Vector）}，如果 $\|v\| = 1$。
+    \item 子集 $S \subset V$ 称为 \textbf{标准正交的（Orthonormal）}，如果它是正交的且其中每个向量都是单位的。
+\end{itemize}
+
+\textbf{例子 2.2}：$\mathbb{R}^n$ 中的标准基向量 $\{ e_1, \dots, e_n \}$ 构成一个标准正交集。
+
+\textbf{例子 2.4}：$S = \left\{ \frac{1}{\sqrt{2}}\begin{pmatrix}1 \\ 1\end{pmatrix}, \frac{1}{\sqrt{2}}\begin{pmatrix}1 \\ -1\end{pmatrix} \right\}$ 是 $\mathbb{R}^2$ 中的一个标准正交集。
+
+\textbf{习题 2.5 (向量标准化)}：对于非零向量 $v \in V$，$\frac{1}{\|v\|} v$ 总是一个单位向量。这个过程称为 \textbf{标准化（Normalizing）}。
+
+\subsection{正交集的线性无关性}
+\textbf{定理 2.9 (正交 $\Rightarrow$ 线性无关)}：设 $S$ 是内积空间 $V$ 中一个由非零向量构成的正交集。则 $S$ 是 \textbf{线性无关} 的。
+\begin{proof}
+    设 $S = \{ v_1, \dots, v_r \}$。假设 $a_1 v_1 + \dots + a_r v_r = 0$。对每个 $i$，取内积 $\langle \cdot, v_i \rangle$，利用正交性可得 $a_i \langle v_i, v_i \rangle = 0$。由于 $v_i \neq 0$，$\langle v_i, v_i \rangle > 0$，故 $a_i = 0$。
+\end{proof}
+\textbf{注意}：反之不成立，线性无关的向量组不一定正交（如 $\mathbb{R}^2$ 中的 $(1,1)^T$ 和 $(0,1)^T$）。
+
+\subsection{正交集下的线性组合}
+\textbf{定理 2.14 (正交基下的坐标公式)}：设 $V$ 是内积空间，$S = \{ v_1, \dots, v_r \}$ 是 $V$ 中一个由非零向量构成的正交集。则对任意 $y \in \operatorname{span}(S)$，有
+\[
+y = \frac{\langle v_1, y \rangle}{\|v_1\|^2} v_1 + \dots + \frac{\langle v_r, y \rangle}{\|v_r\|^2} v_r.
+\]
+这些系数 $\frac{\langle v_i, y \rangle}{\|v_i\|^2}$ 有时被称为 \textbf{傅里叶系数（Fourier Coefficients）}。
+\begin{proof}
+    设 $y = a_1 v_1 + \dots + a_r v_r$。对每个 $i$，取内积 $\langle \cdot, v_i \rangle$，利用正交性可得 $\langle y, v_i \rangle = a_i \langle v_i, v_i \rangle = a_i \|v_i\|^2$，从而解出 $a_i$。
+\end{proof}
+
+\section{格拉姆-施密特过程}
+\subsection{标准正交基的存在性与构造}
+\textbf{定理 3.1 (格拉姆-施密特正交化过程)}：设 $V$ 是内积空间，$S = \{ w_1, \dots, w_n \}$ 是 $V$ 的一组基。递归定义：
+\begin{align*}
+    v_1 &= w_1, \\
+    v_2 &= w_2 - \frac{\langle w_2, v_1 \rangle}{\|v_1\|^2} v_1, \\
+    v_3 &= w_3 - \frac{\langle w_3, v_1 \rangle}{\|v_1\|^2} v_1 - \frac{\langle w_3, v_2 \rangle}{\|v_2\|^2} v_2, \\
+    &\vdots \\
+    v_i &= w_i - \sum_{j=1}^{i-1} \frac{\langle w_i, v_j \rangle}{\|v_j\|^2} v_j, \quad \text{对于 } 2 \le i \le n.
+\end{align*}
+则 $\{ v_1, \dots, v_n \}$ 是 $V$ 的一组 \textbf{正交基}。
+
+\textbf{推论 3.2 (标准正交基的存在性)}：任何内积空间 $V$ 都存在 \textbf{标准正交基（Orthonormal Basis）}。
+\begin{proof}
+    对定理 3.1 得到的正交基 $\{ v_1, \dots, v_n \}$ 进行标准化（即取 $\frac{v_i}{\|v_i\|}$），即可得到标准正交基。
+\end{proof}
+由该过程得到的标准正交基称为 \textbf{格拉姆-施密特标准正交基}。
+
+\subsection{格拉姆-施密特过程示例}
+\textbf{示例 3.4}：求子空间 $\operatorname{span}\left\{ \begin{pmatrix}1 \\ 0 \\ -1\end{pmatrix}, \begin{pmatrix}2 \\ 1 \\ -1\end{pmatrix} \right\}$ 的一组标准正交基。
+\begin{solution}
+    令 $w_1 = (1, 0, -1)^T$, $w_2 = (2, 1, -1)^T$。
+    \begin{align*}
+        v_1 &= w_1 = (1, 0, -1)^T. \\
+        v_2 &= w_2 - \frac{\langle w_2, v_1 \rangle}{\|v_1\|^2} v_1 \\
+            &= \begin{pmatrix}2 \\ 1 \\ -1\end{pmatrix} - \frac{3}{2} \begin{pmatrix}1 \\ 0 \\ -1\end{pmatrix} \\
+            &= \begin{pmatrix}\frac{1}{2} \\ 1 \\ \frac{1}{2}\end{pmatrix}.
+    \end{align*}
+    标准化：
+    \[
+        u_1 = \frac{v_1}{\|v_1\|} = \frac{1}{\sqrt{2}} \begin{pmatrix}1 \\ 0 \\ -1\end{pmatrix}, \quad
+        u_2 = \frac{v_2}{\|v_2\|} = \frac{1}{\sqrt{6}} \begin{pmatrix}1 \\ 2 \\ 1\end{pmatrix}.
+    \]
+    标准正交基为 $\{ u_1, u_2 \}$。
+\end{solution}
+
+\section{正交补}
+\subsection{正交补的定义与性质}
+\textbf{定义 4.1 (正交补)}：设 $S$ 是内积空间 $V$ 的一个非空子集。定义 $S$ 的 \textbf{正交补（Orthogonal Complement）} 为：
+\[
+S^\perp = \{ x \in V : \langle x, y \rangle = 0 \text{ 对所有 } y \in S \}.
+\]
+即，$S^\perp$ 包含所有与 $S$ 中每个向量都正交的向量。
+
+\textbf{例子}：
+\begin{itemize}
+    \item $\{0\}^\perp = V$。
+    \item $V^\perp = \{0\}$。
+    \item 在 $\mathbb{R}^3$ 中，若 $S = \{ e_2 \}$，则 $S^\perp = \operatorname{span}\{ e_1, e_3 \}$（即 $xz$-平面）。
+\end{itemize}
+
+\textbf{定理 4.6}：对任意非空子集 $S \subset V$，$S^\perp$ 是 $V$ 的一个 \textbf{子空间}。
+\begin{proof}
+    利用内积的线性性质验证加法和数乘封闭性。
+\end{proof}
+
+\textbf{习题 4.5}：$S^\perp = (\operatorname{span}(S))^\perp$。因此，我们通常只考虑子空间的正交补。
+\textbf{习题 4.7}：若 $W$ 是 $V$ 的子空间，则 $W \cap W^\perp = \{0\}$。
+
+\subsection{正交投影分解定理}
+\textbf{定理 4.8 (正交投影分解)}：设 $V$ 是内积空间，$W$ 是 $V$ 的子空间。则对任意 $v \in V$，存在 \textbf{唯一} 的 $x \in W$ 和 $y \in W^\perp$，使得 $v = x + y$。
+\begin{itemize}
+    \item 向量 $x$ 称为 $v$ 在 $W$ 上的 \textbf{正交投影（Orthogonal Projection）}，记作 $\operatorname{proj}_W(v)$。
+    \item 若 $\{ v_1, \dots, v_r \}$ 是 $W$ 的一组 \textbf{标准正交基}，则投影可显式计算：
+    \[
+    \operatorname{proj}_W(v) = \langle v, v_1 \rangle v_1 + \langle v, v_2 \rangle v_2 + \dots + \langle v, v_r \rangle v_r.
+    \]
+\end{itemize}
+\begin{proof}
+    \textbf{存在性}：令 $\{ v_1, \dots, v_r \}$ 为 $W$ 的标准正交基。定义 $x = \sum_{i=1}^r \langle v, v_i \rangle v_i \in W$，并令 $y = v - x$。可验证 $\langle y, v_i \rangle = 0$ 对所有 $i$ 成立，故 $y \in W^\perp$。
+    
+    \textbf{唯一性}：若另有 $v = x' + y'$ 满足 $x' \in W, y' \in W^\perp$，则 $x - x' = y' - y \in W \cap W^\perp = \{0\}$，故 $x = x'$, $y = y'$。
+\end{proof}
+
+\textbf{示例 4.10}：设 $W = \operatorname{span}\{(1, -2)^T\}$，其标准正交基可取为 $\frac{1}{\sqrt{5}}(1, -2)^T$。向量 $v = (3, 4)^T$ 在 $W$ 上的正交投影为：
+\[
+\operatorname{proj}_W(v) = \langle v, \frac{1}{\sqrt{5}}(1,-2)^T \rangle \frac{1}{\sqrt{5}}(1,-2)^T = \left( \frac{-5}{5} \right)(1, -2)^T = (-1, 2)^T.
+\]
+分解为 $v = (-1, 2)^T + (4, 2)^T$，其中 $(4,2)^T$ 与 $(1,-2)^T$ 正交。
+
+\section{正交矩阵与对称矩阵（选读）}
+\subsection{正交矩阵}
+\textbf{定义 5.1 (正交矩阵)}：一个 $n \times n$ 矩阵 $Q$ 称为 \textbf{正交矩阵（Orthogonal Matrix）}，如果 $Q^T Q = I_n$。
+
+\textbf{性质}：
+\begin{enumerate}
+    \item $Q$ 的列向量构成 $\mathbb{R}^n$ 的一组 \textbf{标准正交基}（在标准内积下）。反之亦然。
+    \item 若 $P, Q$ 正交，则 $PQ$ 也正交。
+    \item 正交矩阵保持标准内积和长度不变：对任意 $v, w \in \mathbb{R}^n$，$\langle Qv, Qw \rangle = \langle v, w \rangle$，且 $\|Qv\| = \|v\|$。
+\end{enumerate}
+
+\subsection{对称矩阵的正交对角化}
+\textbf{定理 5.5 (实对称矩阵的正交对角化)}：设 $A$ 是一个 $n \times n$ 实对称矩阵。则存在一个 $n \times n$ 正交矩阵 $Q$，使得 $Q^T A Q = D$ 为对角矩阵。
+\begin{proof}
+    思路概要：
+    \begin{enumerate}
+        \item 取 $A$ 的一个单位特征向量 $v_1$，用格拉姆-施密特过程将其扩展为 $\mathbb{R}^n$ 的标准正交基 $\{v_1, \dots, v_n\}$。令 $Q_0 = (v_1 \, v_2 \, \dots \, v_n)$，则 $Q_0^T A Q_0$ 具有分块形式 $\begin{pmatrix} \lambda_1 & B \\ 0 & C \end{pmatrix}$。
+        \item 由 $A$ 的对称性，推出 $B = 0$ 且 $C$ 对称。
+        \item 对 $C$ 递归应用相同过程（归纳法），最终可构造出正交矩阵 $Q$ 使得 $Q^T A Q$ 为对角阵。
+    \end{enumerate}
+\end{proof}
+\textbf{习题 5.6}：反之，若 $A$ 可被正交矩阵对角化，则 $A$ 必为对称矩阵。
+
+\subsection{正定矩阵}
+\textbf{定义 5.7 (正定矩阵)}：一个 $n \times n$ 实对称矩阵 $A$ 称为 \textbf{正定的（Positive Definite）}，如果对任意非零向量 $v \in \mathbb{R}^n$，都有 $v^T A v > 0$。
+
+\textbf{与内积的联系（习题 5.8）}：函数 $\langle v, w \rangle = v^T A w$ 构成 $\mathbb{R}^n$ 上的一个内积 \textbf{当且仅当} $A$ 是正定矩阵。
+
+\textbf{分解定理（习题 5.9）}：若 $A$ 正定，则存在可逆矩阵 $Q$ 使得 $A = Q^T Q$。这可以视为对标准内积进行“加权”或“基变换”的表示。
+
+\section*{全章总结}
+本章系统地介绍了内积空间的理论及其核心应用。内积将几何概念代数化，使我们能够在一般向量空间中谈论长度、角度和正交性。标准正交基因其坐标公式简单（傅里叶系数）且线性无关而备受青睐。格拉姆-施密特过程提供了从任意基构造标准正交基的算法，保证了其存在性。正交补的概念将空间分解为相互垂直的子空间，正交投影定理则给出了将任意向量分解为平行于子空间和垂直于子空间两部分的标准方法，这是许多应用（如最小二乘法）的基础。最后，作为应用，我们看到了内积与矩阵论（正交矩阵、对称矩阵对角化、正定矩阵）的深刻联系。掌握这些概念和工具，对于理解线性代数在几何、信号处理、优化等领域的应用至关重要。
+
+\end{document}
