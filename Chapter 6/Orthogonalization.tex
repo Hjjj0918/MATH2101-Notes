@@ -1,10 +1,12 @@
 \documentclass{article}
 \usepackage[UTF8]{ctex}
 \usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{booktabs} % 用于制作更美观的表格
 \usepackage{multirow} % 用于合并表格行
 \usepackage{geometry} % 调整页边距
+\newtheorem{solution}{Solution}
 \geometry{a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -122,10 +124,32 @@ y = \frac{\langle v_1, y \rangle}{\|v_1\|^2} v_1 + \dots + \frac{\langle v_r, y 
     v_i &= w_i - \sum_{j=1}^{i-1} \frac{\langle w_i, v_j \rangle}{\|v_j\|^2} v_j, \quad \text{对于 } 2 \le i \le n.
 \end{align*}
 则 $\{ v_1, \dots, v_n \}$ 是 $V$ 的一组 \textbf{正交基}。
+\begin{proof}
+我们分三步证明 $S'=\{v_1,\dots,v_n\}$ 是 $V$ 的一组基：张成性、线性无关性和两两正交性。
+
+\textbf{张成性}：由递归定义可重写为（对 $i\ge1$）
+\begin{equation}\label{eq:rearrange}
+w_i = v_i + \sum_{j=1}^{i-1} \frac{\langle w_i, v_j \rangle}{\|v_j\|^2} v_j
+\end{equation}
+因此对每个 $i$，$w_i$ 都可以表示为 $v_1,\dots,v_i$ 的线性组合，故 $w_i\in\operatorname{span}(S')$。由 $\operatorname{span}\{w_1,\dots,w_n\}=V$ 可得 $V\subset\operatorname{span}(S')$；反向包含显然成立，因此 $\operatorname{span}(S')=V$。
+
+\textbf{线性无关性}：设 $b_1v_1+\dots+b_nv_n=0$。由等式 (\ref{eq:rearrange}) 可将每个 $v_i$ 反写为 $w_i$ 与更小下标的 $v_j$ 的线性组合，从而将上式改写为
+\[ b'_1w_1+\dots+b'_nw_n=0, \]
+其中 $b'_n=b_n$。由于 $\{w_1,\dots,w_n\}$ 是基，线性无关，故 $b'_n=0$，即 $b_n=0$。去掉最后一项后对 $n-1$ 个向量重复此步骤，归纳可得 $b_1=\dots=b_n=0$，因此 $S'$ 线性无关。
+
+\textbf{两两正交性}：按归纳法对 $k$ 证明 $v_k$ 与 $v_1,\dots,v_{k-1}$ 正交。对于 $k=1$ 显然成立。设对 $k-1$ 成立，取 $l<k$，由定义
+\begin{align*}
+\langle v_k,v_l\rangle &= \left\langle w_k-\sum_{j=1}^{k-1}\frac{\langle w_k,v_j\rangle}{\|v_j\|^2}v_j,\;v_l\right\rangle \\
+&=\langle w_k,v_l\rangle-\sum_{j=1}^{k-1}\frac{\langle w_k,v_j\rangle}{\|v_j\|^2}\langle v_j,v_l\rangle.
+\end{align*}
+由归纳假设，若 $j\ne l$ 则 $\langle v_j,v_l\rangle=0$，因此上式右边只有 $j=l$ 时的项，得到
+\[\langle v_k,v_l\rangle=\langle w_k,v_l\rangle-\frac{\langle w_k,v_l\rangle}{\|v_l\|^2}\langle v_l,v_l\rangle=\langle w_k,v_l\rangle-\langle w_k,v_l\rangle=0.\]
+由此完成归纳，得到 $v_1,\dots,v_n$ 两两正交。
+\end{proof}
 
 \textbf{推论 3.2 (标准正交基的存在性)}：任何内积空间 $V$ 都存在 \textbf{标准正交基（Orthonormal Basis）}。
 \begin{proof}
-    对定理 3.1 得到的正交基 $\{ v_1, \dots, v_n \}$ 进行标准化（即取 $\frac{v_i}{\|v_i\|}$），即可得到标准正交基。
+存在一组基 $\{w_1,\dots,w_n\}$（任意基总存在）。由定理 3.1 对该基施密特正交化，可得到一组正交基 $\{v_1,\dots,v_n\}$。对每个非零 $v_i$ 取其标准化向量 $u_i=v_i/\|v_i\|$（参见习题 2.5），则 $\{u_1,\dots,u_n\}$ 为一组标准正交基。
 \end{proof}
 由该过程得到的标准正交基称为 \textbf{格拉姆-施密特标准正交基}。
 
@@ -168,6 +192,18 @@ S^\perp = \{ x \in V : \langle x, y \rangle = 0 \text{ 对所有 } y \in S \}.
 \end{proof}
 
 \textbf{习题 4.5}：$S^\perp = (\operatorname{span}(S))^\perp$。因此，我们通常只考虑子空间的正交补。
+\begin{proof}
+我们证明两边相互包含。
+
+\textbf{(i) }$[\operatorname{span}(S)]^\perp\subset S^\perp$：任取 $v\in[\operatorname{span}(S)]^\perp$，则对任意 $x\in\operatorname{span}(S)$ 有 $\langle v,x\rangle=0$。由于 $S\subset\operatorname{span}(S)$，对任意 $s\in S$ 亦有 $\langle v,s\rangle=0$，故 $v\in S^\perp$。
+\textbf{(ii) }$S^\perp\subset[\operatorname{span}(S)]^\perp$：任取 $v\in S^\perp$，即对所有 $s\in S$ 都有 $\langle v,s\rangle=0$。设 $x\in\operatorname{span}(S)$，则存在 $s_1,\dots,s_k\in S$ 与标量 $c_1,\dots,c_k$ 使得 $x=\sum_{i=1}^k c_i s_i$。由内积的线性性得
+\[
+\langle v,x\rangle=\sum_{i=1}^k c_i\langle v,s_i\rangle=0.
+\]
+因此 $v\in[\operatorname{span}(S)]^\perp$。
+
+由 (i) 与 (ii) 得所需等号 $S^\perp=[\operatorname{span}(S)]^\perp$。
+\end{proof}
 \textbf{习题 4.7}：若 $W$ 是 $V$ 的子空间，则 $W \cap W^\perp = \{0\}$。
 
 \subsection{正交投影分解定理}
